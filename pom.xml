@@ -8,7 +8,7 @@
 		<version>2.7.8</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>com.example</groupId>
+	<groupId>com.tales</groupId>
 	<artifactId>mini-autorizador</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>mini-autorizador</name>
@@ -48,6 +48,11 @@
 		<dependency>
 			<groupId>org.springframework.kafka</groupId>
 			<artifactId>spring-kafka-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>

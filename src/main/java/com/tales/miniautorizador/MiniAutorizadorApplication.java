@@ -1,4 +1,4 @@
-package com.example.miniautorizador;
+package com.tales.miniautorizador;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
