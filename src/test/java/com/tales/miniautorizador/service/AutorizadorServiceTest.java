@@ -47,5 +47,10 @@ public class AutorizadorServiceTest {
         AutorizacaoRetorno retorno = autorizadorService.performTransaction(transacao, this.cartao);
         Assert.assertEquals(AutorizacaoRetorno.SENHA_INVALIDA,retorno);
     }
-    // realização de uma transação com cartão inexistente
+    @Test()
+    public void performTransactionWithCardNonexistent(){
+        TransacaoRequest transacao = new TransacaoRequest(12323434, "1234", new BigDecimal("200.00"));
+        AutorizacaoRetorno retorno = autorizadorService.performTransaction(transacao, this.cartao);
+        Assert.assertEquals(AutorizacaoRetorno.CARTAO_INEXISTENTE,retorno);
+    }
 }

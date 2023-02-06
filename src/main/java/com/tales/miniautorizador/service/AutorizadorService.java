@@ -14,6 +14,9 @@ public class AutorizadorService {
     }
 
     public AutorizacaoRetorno performTransaction(TransacaoRequest transacao, Cartao cartao) {
+        if(transacao.getNumCartao().compareTo(cartao.getNumCartao())!=0){
+            return AutorizacaoRetorno.CARTAO_INEXISTENTE;
+        }
         if(!transacao.getSenha().equals(cartao.getSenha())){
             return AutorizacaoRetorno.SENHA_INVALIDA;
         }
