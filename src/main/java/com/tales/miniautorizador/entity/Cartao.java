@@ -15,4 +15,8 @@ public class Cartao {
         this.senha = senha;
         this.saldo = new BigDecimal("500.00");
     }
+
+    public void performDebit(BigDecimal valor) {
+        this.saldo = this.saldo.subtract(valor);
+    }
 }
