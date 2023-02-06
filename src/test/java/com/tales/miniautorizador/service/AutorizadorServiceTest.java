@@ -41,6 +41,11 @@ public class AutorizadorServiceTest {
         }
         Assert.assertEquals(AutorizacaoRetorno.SALDO_INSUFICIENTE,retorno);
     }
-    // realização de uma transação com senha inválida
+    @Test()
+    public void performTransactionWithInvalidPassword(){
+        TransacaoRequest transacao = new TransacaoRequest(123234345, "12345", new BigDecimal("200.00"));
+        AutorizacaoRetorno retorno = autorizadorService.performTransaction(transacao, this.cartao);
+        Assert.assertEquals(AutorizacaoRetorno.SENHA_INVALIDA,retorno);
+    }
     // realização de uma transação com cartão inexistente
 }

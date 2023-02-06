@@ -14,6 +14,9 @@ public class AutorizadorService {
     }
 
     public AutorizacaoRetorno performTransaction(TransacaoRequest transacao, Cartao cartao) {
+        if(!transacao.getSenha().equals(cartao.getSenha())){
+            return AutorizacaoRetorno.SENHA_INVALIDA;
+        }
         if(hasCredito(transacao, cartao)){
             return AutorizacaoRetorno.SALDO_INSUFICIENTE;
         }
