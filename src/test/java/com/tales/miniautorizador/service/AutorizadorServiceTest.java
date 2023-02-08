@@ -3,7 +3,7 @@ package com.tales.miniautorizador.service;
 import com.tales.miniautorizador.dto.TransacaoRequest;
 import com.tales.miniautorizador.entity.Cartao;
 import com.tales.miniautorizador.enums.AutorizacaoRetorno;
-import org.junit.Assert;
+import com.tales.miniautorizador.exception.UnprocessableException;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -11,6 +11,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
 
 @SpringBootTest()
 public class AutorizadorServiceTest {
@@ -31,7 +34,7 @@ public class AutorizadorServiceTest {
 
     @Test()
     public void verifyNewCardBalance(){
-        Assert.assertEquals(new BigDecimal("500.00"),this.cartao.getSaldo());
+        assertEquals(new BigDecimal("500.00"),this.cartao.getSaldo());
     }
     @Test()
     public void performSeveralTransactionsWaitingInsufficientBalance(){
@@ -39,22 +42,31 @@ public class AutorizadorServiceTest {
         transactions.add(new TransacaoRequest(6549873025634501L,"1234",new BigDecimal("100.00")));
         transactions.add(new TransacaoRequest(6549873025634501L,"1234",new BigDecimal("200.00")));
         transactions.add(new TransacaoRequest(6549873025634501L,"1234",new BigDecimal("300.00")));
-        AutorizacaoRetorno retorno = AutorizacaoRetorno.OK;
-        for (TransacaoRequest transacao : transactions) {
-            retorno = autorizadorService.performTransaction(transacao);
-        }
-        Assert.assertEquals(AutorizacaoRetorno.SALDO_INSUFICIENTE,retorno);
+        UnprocessableException exception = assertThrows(UnprocessableException.class,
+                () -> {
+                    for (TransacaoRequest transacao : transactions) {
+                        autorizadorService.performTransaction(transacao);
+                    }
+                });
+        assertEquals(AutorizacaoRetorno.SALDO_INSUFICIENTE,
+                exception.getResponse());
     }
     @Test()
     public void performTransactionWithInvalidPassword(){
         TransacaoRequest transacao = new TransacaoRequest(6549873025634501L, "12345", new BigDecimal("200.00"));
-        AutorizacaoRetorno retorno = autorizadorService.performTransaction(transacao);
-        Assert.assertEquals(AutorizacaoRetorno.SENHA_INVALIDA,retorno);
+        assertEquals(AutorizacaoRetorno.SENHA_INVALIDA,
+                getUnprocessableException(transacao).getResponse());
     }
     @Test()
     public void performTransactionWithCardNonexistent(){
         TransacaoRequest transacao = new TransacaoRequest(12323434L, "1234", new BigDecimal("200.00"));
-        AutorizacaoRetorno retorno = autorizadorService.performTransaction(transacao);
-        Assert.assertEquals(AutorizacaoRetorno.CARTAO_INEXISTENTE,retorno);
+        assertEquals(AutorizacaoRetorno.CARTAO_INEXISTENTE,
+                getUnprocessableException(transacao).getResponse());
+    }
+
+    private UnprocessableException getUnprocessableException(TransacaoRequest transacao) {
+        UnprocessableException exception = assertThrows(UnprocessableException.class,
+                () -> autorizadorService.performTransaction(transacao));
+        return exception;
     }
 }

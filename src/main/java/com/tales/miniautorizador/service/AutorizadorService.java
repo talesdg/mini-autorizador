@@ -3,6 +3,7 @@ package com.tales.miniautorizador.service;
 import com.tales.miniautorizador.dto.TransacaoRequest;
 import com.tales.miniautorizador.entity.Cartao;
 import com.tales.miniautorizador.enums.AutorizacaoRetorno;
+import com.tales.miniautorizador.exception.UnprocessableException;
 import com.tales.miniautorizador.repository.CartaoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -19,20 +20,32 @@ public class AutorizadorService {
         return cartaoRepository.save(new Cartao(numCartao,senha));
     }
 
-    public AutorizacaoRetorno performTransaction(TransacaoRequest transacao) {
+    public AutorizacaoRetorno performTransaction(TransacaoRequest transacao) throws UnprocessableException{
         Cartao cartao = cartaoRepository.findByNumCartao(transacao.getNumCartao());
-        if(cartao == null){
-            return AutorizacaoRetorno.CARTAO_INEXISTENTE;
-        }
-        if(!transacao.getSenha().equals(cartao.getSenha())){
-            return AutorizacaoRetorno.SENHA_INVALIDA;
-        }
-        if(hasCredito(transacao, cartao)){
-            return AutorizacaoRetorno.SALDO_INSUFICIENTE;
-        }
+        validaCartaoExistente(cartao);
+        validaSenhaInvalida(transacao, cartao);
+        validaSaldo(transacao, cartao);
         cartao.performDebit(transacao.getValor());
         cartaoRepository.save(cartao);
         return AutorizacaoRetorno.OK;
+    }
+
+    private static void validaSaldo(TransacaoRequest transacao, Cartao cartao) {
+        if(hasCredito(transacao, cartao)){
+            throw new UnprocessableException(AutorizacaoRetorno.SALDO_INSUFICIENTE);
+        }
+    }
+
+    private static void validaSenhaInvalida(TransacaoRequest transacao, Cartao cartao) {
+        if(!transacao.getSenha().equals(cartao.getSenha())){
+            throw new UnprocessableException(AutorizacaoRetorno.SENHA_INVALIDA);
+        }
+    }
+
+    private static void validaCartaoExistente(Cartao cartao) {
+        if(cartao == null){
+            throw new UnprocessableException(AutorizacaoRetorno.CARTAO_INEXISTENTE);
+        }
     }
 
     private static boolean hasCredito(TransacaoRequest transacao, Cartao cartao) {
