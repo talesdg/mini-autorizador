@@ -3,6 +3,7 @@ package com.tales.miniautorizador.service;
 import com.tales.miniautorizador.dto.TransacaoRequest;
 import com.tales.miniautorizador.entity.Cartao;
 import com.tales.miniautorizador.enums.AutorizacaoRetorno;
+import com.tales.miniautorizador.exception.NotFoundException;
 import com.tales.miniautorizador.exception.UnprocessableException;
 import com.tales.miniautorizador.repository.CartaoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,4 +59,17 @@ public class AutorizadorService {
     public void deleteCard(Long numCartao){
         cartaoRepository.deleteByNumCartao(numCartao);
     }
+
+    public ResponseEntity<Object> getCardBalance(Long numCartao) {
+        Cartao cartao = cartaoRepository.findByNumCartao(numCartao);
+        verificaCartaoExistente(cartao);
+        return new ResponseEntity<>(cartao.getSaldo(), HttpStatus.OK);
+    }
+
+    private static void verificaCartaoExistente(Cartao cartao) {
+        if(cartao == null){
+            throw new NotFoundException();
+        }
+    }
+
 }

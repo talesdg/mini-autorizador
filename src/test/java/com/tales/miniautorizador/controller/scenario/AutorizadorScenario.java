@@ -1,6 +1,5 @@
 package com.tales.miniautorizador.controller.scenario;
 
-import com.tales.miniautorizador.enums.AutorizacaoRetorno;
 import lombok.Getter;
 import org.springframework.test.web.servlet.ResultMatcher;
 
@@ -16,9 +15,9 @@ public class AutorizadorScenario {
     @Getter
     private Long numCartao;
     @Getter
-    private AutorizacaoRetorno expectedResponse;
+    private Object expectedResponse;
 
-    public AutorizadorScenario(String name, ResultMatcher status, BigDecimal valor, String senha, Long numCartao, AutorizacaoRetorno expectedResponse) {
+    public AutorizadorScenario(String name, ResultMatcher status, BigDecimal valor, String senha, Long numCartao, Object expectedResponse) {
         this.name = name;
         this.status = status;
         this.valor = valor;
