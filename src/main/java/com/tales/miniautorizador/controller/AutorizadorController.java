@@ -11,14 +11,16 @@ public class AutorizadorController {
     @Autowired
     private AutorizadorService autorizadorService;
 
+    @PostMapping("/cartoes")
+    public ResponseEntity<Object> createNewCard(@RequestBody TransacaoRequest body) {
+        return autorizadorService.createNewCard(body.getNumCartao(), body.getSenha());
+    }
     @GetMapping("/cartoes/{numeroCartao}")
     public ResponseEntity<Object> getCardBalance(@PathVariable Long numeroCartao) {
         return autorizadorService.getCardBalance(numeroCartao);
     }
-
     @PostMapping("/transacoes")
     public ResponseEntity<Object> performTransaction(@RequestBody TransacaoRequest body) {
         return autorizadorService.performTransaction(body);
     }
-
 }

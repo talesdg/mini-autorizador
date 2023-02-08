@@ -75,4 +75,25 @@ public class AutorizadorControllerTest {
         return lista.stream();
     }
 
+    @ParameterizedTest(name = "{index}. {arguments}")
+    @MethodSource
+    public void whenCreateNewCard(AutorizadorScenario scenario) throws Exception {
+        ObjectMapper objectMapper = new ObjectMapper();
+        String jsonString = objectMapper.writeValueAsString(
+                new TransacaoRequest(scenario.getNumCartao(), scenario.getSenha(),scenario.getValor())
+        );
+        mockMvc.perform(post("/cartoes").content(jsonString).contentType(MediaType.APPLICATION_JSON))
+                .andExpect(scenario.getStatus())
+                .andExpect(jsonPath("numCartao").value(scenario.getNumCartao()))
+                .andExpect(jsonPath("senha").value(scenario.getSenha()))
+        ;
+    }
+
+    private static Stream<AutorizadorScenario> whenCreateNewCard(){
+        List<AutorizadorScenario> lista = new ArrayList<>();
+        lista.add(new AutorizadorScenario("OK",status().is2xxSuccessful(),null,"1234",6549873025634503L,null));
+        lista.add(new AutorizadorScenario("NOT_FOUND",status().is4xxClientError(),null,"1234",6549873025634503L,null));
+        return lista.stream();
+    }
+
 }

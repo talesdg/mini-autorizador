@@ -1,15 +1,13 @@
 package com.tales.miniautorizador.exception;
 
-import com.tales.miniautorizador.enums.AutorizacaoRetorno;
-
 public class UnprocessableException extends RuntimeException{
 
-    private AutorizacaoRetorno response;
+    private Object response;
 
-    public UnprocessableException(AutorizacaoRetorno response){
+    public UnprocessableException(Object response){
         this.response = response;
     }
-    public AutorizacaoRetorno getResponse(){
+    public Object getResponse(){
         return this.response;
     }
 }

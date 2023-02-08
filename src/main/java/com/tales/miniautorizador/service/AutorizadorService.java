@@ -19,13 +19,16 @@ public class AutorizadorService {
 
     @Autowired
     private CartaoRepository cartaoRepository;
-    public Cartao createNewCard(Long numCartao, String senha){
-        return cartaoRepository.save(new Cartao(numCartao,senha));
+    public ResponseEntity<Object> createNewCard(Long numCartao, String senha){
+        Cartao cartao = cartaoRepository.findByNumCartao(numCartao);
+        validaCartaoExistente(cartao);
+        cartao = cartaoRepository.save(new Cartao(numCartao, senha));
+        return new ResponseEntity<>(cartao, HttpStatus.CREATED);
     }
 
     public ResponseEntity<Object> performTransaction(TransacaoRequest transacao) throws UnprocessableException{
         Cartao cartao = cartaoRepository.findByNumCartao(transacao.getNumCartao());
-        validaCartaoExistente(cartao);
+        validaCartaoInexistente(cartao);
         validaSenhaInvalida(transacao, cartao);
         validaSaldo(transacao, cartao);
         cartao.performDebit(transacao.getValor());
@@ -45,9 +48,15 @@ public class AutorizadorService {
         }
     }
 
-    private static void validaCartaoExistente(Cartao cartao) {
+    private static void validaCartaoInexistente(Cartao cartao) {
         if(cartao == null){
             throw new UnprocessableException(AutorizacaoRetorno.CARTAO_INEXISTENTE);
+        }
+    }
+
+    private static void validaCartaoExistente(Cartao cartao) {
+        if(cartao != null){
+            throw new UnprocessableException(cartao);
         }
     }
 
@@ -62,11 +71,11 @@ public class AutorizadorService {
 
     public ResponseEntity<Object> getCardBalance(Long numCartao) {
         Cartao cartao = cartaoRepository.findByNumCartao(numCartao);
-        verificaCartaoExistente(cartao);
+        verificaCartaoInexistente(cartao);
         return new ResponseEntity<>(cartao.getSaldo(), HttpStatus.OK);
     }
 
-    private static void verificaCartaoExistente(Cartao cartao) {
+    private static void verificaCartaoInexistente(Cartao cartao) {
         if(cartao == null){
             throw new NotFoundException();
         }

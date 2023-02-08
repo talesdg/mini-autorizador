@@ -24,7 +24,7 @@ public class AutorizadorServiceTest {
 
     @BeforeEach
     public void setUp(){
-        this.cartao = autorizadorService.createNewCard(6549873025634501L, "1234");
+        this.cartao = (Cartao) autorizadorService.createNewCard(6549873025634501L, "1234").getBody();
     }
 
     @AfterEach
