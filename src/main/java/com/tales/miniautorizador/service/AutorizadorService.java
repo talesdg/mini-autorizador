@@ -14,6 +14,8 @@ import org.springframework.stereotype.Service;
 import javax.transaction.Transactional;
 import java.math.BigDecimal;
 
+import static com.tales.miniautorizador.utils.AutorizadorConstants.ZERO;
+
 @Service
 public class AutorizadorService {
 
@@ -62,7 +64,7 @@ public class AutorizadorService {
 
     private static boolean hasCredito(TransacaoRequest transacao, Cartao cartao) {
         BigDecimal saldo = cartao.getSaldo().subtract(transacao.getValor());
-        return saldo.compareTo(BigDecimal.valueOf(0L)) == -1;
+        return saldo.compareTo(BigDecimal.valueOf(ZERO)) == -1;
     }
     @Transactional
     public void deleteCard(Long numCartao){

@@ -12,6 +12,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.tales.miniautorizador.utils.AutorizadorConstants.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 
@@ -24,24 +25,24 @@ public class AutorizadorServiceTest {
 
     @BeforeEach
     public void setUp(){
-        this.cartao = (Cartao) autorizadorService.createNewCard(6549873025634501L, "1234").getBody();
+        this.cartao = (Cartao) autorizadorService.createNewCard(NUM_CARTAO, SENHA).getBody();
     }
 
     @AfterEach
     public void setOut(){
-        autorizadorService.deleteCard(6549873025634501L);
+        autorizadorService.deleteCard(NUM_CARTAO);
     }
 
     @Test()
     public void verifyNewCardBalance(){
-        assertEquals(new BigDecimal("500.00"),this.cartao.getSaldo());
+        assertEquals(new BigDecimal(VALOR_500),this.cartao.getSaldo());
     }
     @Test()
     public void performSeveralTransactionsWaitingInsufficientBalance(){
         List<TransacaoRequest> transactions = new ArrayList<>();
-        transactions.add(new TransacaoRequest(6549873025634501L,"1234",new BigDecimal("100.00")));
-        transactions.add(new TransacaoRequest(6549873025634501L,"1234",new BigDecimal("200.00")));
-        transactions.add(new TransacaoRequest(6549873025634501L,"1234",new BigDecimal("300.00")));
+        transactions.add(new TransacaoRequest(NUM_CARTAO, SENHA,new BigDecimal(VALOR_100)));
+        transactions.add(new TransacaoRequest(NUM_CARTAO, SENHA,new BigDecimal(VALOR_200)));
+        transactions.add(new TransacaoRequest(NUM_CARTAO, SENHA,new BigDecimal(VALOR_300)));
         UnprocessableException exception = assertThrows(UnprocessableException.class,
                 () -> {
                     for (TransacaoRequest transacao : transactions) {
@@ -53,13 +54,13 @@ public class AutorizadorServiceTest {
     }
     @Test()
     public void performTransactionWithInvalidPassword(){
-        TransacaoRequest transacao = new TransacaoRequest(6549873025634501L, "12345", new BigDecimal("200.00"));
+        TransacaoRequest transacao = new TransacaoRequest(NUM_CARTAO, SENHA_INCORRETA, new BigDecimal(VALOR_200));
         assertEquals(AutorizacaoRetorno.SENHA_INVALIDA,
                 getUnprocessableException(transacao).getResponse());
     }
     @Test()
     public void performTransactionWithCardNonexistent(){
-        TransacaoRequest transacao = new TransacaoRequest(12323434L, "1234", new BigDecimal("200.00"));
+        TransacaoRequest transacao = new TransacaoRequest(NUM_CARTAO_INEXISTENTE, SENHA, new BigDecimal(VALOR_200));
         assertEquals(AutorizacaoRetorno.CARTAO_INEXISTENTE,
                 getUnprocessableException(transacao).getResponse());
     }

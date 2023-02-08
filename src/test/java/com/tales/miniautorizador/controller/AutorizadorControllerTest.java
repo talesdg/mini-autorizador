@@ -5,6 +5,8 @@ import com.tales.miniautorizador.controller.scenario.AutorizadorScenario;
 import com.tales.miniautorizador.dto.TransacaoRequest;
 import com.tales.miniautorizador.enums.AutorizacaoRetorno;
 import com.tales.miniautorizador.service.AutorizadorService;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
+import static com.tales.miniautorizador.utils.AutorizadorConstants.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -31,47 +34,50 @@ public class AutorizadorControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
+    @BeforeEach
+    public void setUp(){
+        autorizadorService.deleteCard(NUM_CARTAO);
+        autorizadorService.createNewCard(NUM_CARTAO_NEW, SENHA);
+    }
+
+    @AfterEach
+    public void setOut(){
+        autorizadorService.deleteCard(NUM_CARTAO_NEW);
+    }
+
     @ParameterizedTest(name = "{index}. {arguments}")
     @MethodSource
     public void whenPerformTransaction(AutorizadorScenario scenario) throws Exception {
-        autorizadorService.createNewCard(6549873025634501L, "1234");
         ObjectMapper objectMapper = new ObjectMapper();
         String jsonString = objectMapper.writeValueAsString(
                 new TransacaoRequest(scenario.getNumCartao(), scenario.getSenha(),scenario.getValor())
         );
-        mockMvc.perform(post("/transacoes").content(jsonString).contentType(MediaType.APPLICATION_JSON))
+        mockMvc.perform(post(URL_TRANSACOES).content(jsonString).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(scenario.getStatus())
                 .andExpect(content().string("\""+scenario.getExpectedResponse()+"\""));
-        autorizadorService.deleteCard(6549873025634501L);
     }
 
     private static Stream<AutorizadorScenario> whenPerformTransaction(){
         List<AutorizadorScenario> lista = new ArrayList<>();
-        lista.add(new AutorizadorScenario("OK",status().is2xxSuccessful(),new BigDecimal("10.00"),"1234",6549873025634501L,AutorizacaoRetorno.OK));
-        lista.add(new AutorizadorScenario("CARTAO_INEXISTENTE",status().is4xxClientError(),new BigDecimal("10.00"),"1234",6549873025634502L,AutorizacaoRetorno.CARTAO_INEXISTENTE));
-        lista.add(new AutorizadorScenario("SALDO_INSUFICIENTE",status().is4xxClientError(),new BigDecimal("1000.00"),"1234",6549873025634501L,AutorizacaoRetorno.SALDO_INSUFICIENTE));
-        lista.add(new AutorizadorScenario("SENHA_INVALIDA",status().is4xxClientError(),new BigDecimal("10.00"),"12345",6549873025634501L,AutorizacaoRetorno.SENHA_INVALIDA));
+        lista.add(new AutorizadorScenario("OK",status().is2xxSuccessful(),new BigDecimal(VALOR_100), SENHA,NUM_CARTAO_NEW,AutorizacaoRetorno.OK));
+        lista.add(new AutorizadorScenario("CARTAO_INEXISTENTE",status().is4xxClientError(),new BigDecimal(VALOR_100), SENHA,NUM_CARTAO,AutorizacaoRetorno.CARTAO_INEXISTENTE));
+        lista.add(new AutorizadorScenario("SALDO_INSUFICIENTE",status().is4xxClientError(),new BigDecimal(VALOR_1000), SENHA,NUM_CARTAO_NEW,AutorizacaoRetorno.SALDO_INSUFICIENTE));
+        lista.add(new AutorizadorScenario("SENHA_INVALIDA",status().is4xxClientError(),new BigDecimal(VALOR_100),SENHA_INCORRETA,NUM_CARTAO_NEW,AutorizacaoRetorno.SENHA_INVALIDA));
         return lista.stream();
     }
 
     @ParameterizedTest(name = "{index}. {arguments}")
     @MethodSource
     public void whenCheckBalance(AutorizadorScenario scenario) throws Exception {
-        autorizadorService.createNewCard(6549873025634501L, "1234");
-        ObjectMapper objectMapper = new ObjectMapper();
-        String jsonString = objectMapper.writeValueAsString(
-                new TransacaoRequest(scenario.getNumCartao(), scenario.getSenha(),scenario.getValor())
-        );
-        mockMvc.perform(get("/cartoes/"+scenario.getNumCartao()).content(jsonString).contentType(MediaType.APPLICATION_JSON))
+        mockMvc.perform(get(URL_CARD_BALANCE_+scenario.getNumCartao()))
                 .andExpect(scenario.getStatus())
                 .andExpect(content().string(scenario.getExpectedResponse().toString()))
         ;
-        autorizadorService.deleteCard(6549873025634501L);
     }
     private static Stream<AutorizadorScenario> whenCheckBalance(){
         List<AutorizadorScenario> lista = new ArrayList<>();
-        lista.add(new AutorizadorScenario("OK",status().is2xxSuccessful(),null,"1234",6549873025634501L,new BigDecimal("500.00")));
-        lista.add(new AutorizadorScenario("NOT_FOUND",status().is4xxClientError(),null,"1234",6549873025634502L,""));
+        lista.add(new AutorizadorScenario("OK",status().is2xxSuccessful(),null, SENHA,NUM_CARTAO_NEW,new BigDecimal(VALOR_500)));
+        lista.add(new AutorizadorScenario("NOT_FOUND",status().is4xxClientError(),null, SENHA,NUM_CARTAO,""));
         return lista.stream();
     }
 
@@ -82,7 +88,10 @@ public class AutorizadorControllerTest {
         String jsonString = objectMapper.writeValueAsString(
                 new TransacaoRequest(scenario.getNumCartao(), scenario.getSenha(),scenario.getValor())
         );
-        mockMvc.perform(post("/cartoes").content(jsonString).contentType(MediaType.APPLICATION_JSON))
+        if(scenario.getExpectedResponse().equals(true)){
+            mockMvc.perform(post(URL_CREATE_NEW_CARD).content(jsonString).contentType(MediaType.APPLICATION_JSON));
+        }
+        mockMvc.perform(post(URL_CREATE_NEW_CARD).content(jsonString).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(scenario.getStatus())
                 .andExpect(jsonPath("numCartao").value(scenario.getNumCartao()))
                 .andExpect(jsonPath("senha").value(scenario.getSenha()))
@@ -91,8 +100,8 @@ public class AutorizadorControllerTest {
 
     private static Stream<AutorizadorScenario> whenCreateNewCard(){
         List<AutorizadorScenario> lista = new ArrayList<>();
-        lista.add(new AutorizadorScenario("OK",status().is2xxSuccessful(),null,"1234",6549873025634503L,null));
-        lista.add(new AutorizadorScenario("NOT_FOUND",status().is4xxClientError(),null,"1234",6549873025634503L,null));
+        lista.add(new AutorizadorScenario("OK",status().is2xxSuccessful(),null, SENHA,NUM_CARTAO,false));
+        lista.add(new AutorizadorScenario("NOT_FOUND",status().is4xxClientError(),null, SENHA,NUM_CARTAO,true));
         return lista.stream();
     }
 
