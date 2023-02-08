@@ -1,16 +1,27 @@
 package com.tales.miniautorizador.entity;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
+import javax.persistence.*;
 import java.math.BigDecimal;
 @Data
+@Entity
+@NoArgsConstructor
+@Table(name = "cartao")
 public class Cartao {
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(name = "id", nullable = false)
     private Long id;
-    private Integer numCartao;
+    @Column(name = "numCartao", nullable = false)
+    private Long numCartao;
+    @Column(name = "senha", nullable = false)
     private String senha;
+    @Column(name = "saldo", nullable = false)
     private BigDecimal saldo;
 
-    public Cartao(Integer numCartao, String senha){
+    public Cartao(Long numCartao, String senha){
         this.numCartao = numCartao;
         this.senha = senha;
         this.saldo = new BigDecimal("500.00");
