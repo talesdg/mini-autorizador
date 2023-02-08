@@ -6,6 +6,8 @@ import com.tales.miniautorizador.enums.AutorizacaoRetorno;
 import com.tales.miniautorizador.exception.UnprocessableException;
 import com.tales.miniautorizador.repository.CartaoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -20,14 +22,14 @@ public class AutorizadorService {
         return cartaoRepository.save(new Cartao(numCartao,senha));
     }
 
-    public AutorizacaoRetorno performTransaction(TransacaoRequest transacao) throws UnprocessableException{
+    public ResponseEntity<Object> performTransaction(TransacaoRequest transacao) throws UnprocessableException{
         Cartao cartao = cartaoRepository.findByNumCartao(transacao.getNumCartao());
         validaCartaoExistente(cartao);
         validaSenhaInvalida(transacao, cartao);
         validaSaldo(transacao, cartao);
         cartao.performDebit(transacao.getValor());
         cartaoRepository.save(cartao);
-        return AutorizacaoRetorno.OK;
+        return new ResponseEntity<>(AutorizacaoRetorno.OK, HttpStatus.CREATED);
     }
 
     private static void validaSaldo(TransacaoRequest transacao, Cartao cartao) {
