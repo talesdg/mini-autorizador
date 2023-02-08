@@ -1,10 +1,10 @@
 package com.tales.miniautorizador.dto;
 
-import lombok.Data;
+import lombok.Getter;
 
 import java.math.BigDecimal;
 
-@Data
+@Getter
 public class TransacaoRequest {
     private Long numCartao;
     private String senha;
