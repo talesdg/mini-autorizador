@@ -19,8 +19,9 @@ public class AutorizadorService {
         return cartaoRepository.save(new Cartao(numCartao,senha));
     }
 
-    public AutorizacaoRetorno performTransaction(TransacaoRequest transacao, Cartao cartao) {
-        if(transacao.getNumCartao().compareTo(cartao.getNumCartao())!=0){
+    public AutorizacaoRetorno performTransaction(TransacaoRequest transacao) {
+        Cartao cartao = cartaoRepository.findByNumCartao(transacao.getNumCartao());
+        if(cartao == null){
             return AutorizacaoRetorno.CARTAO_INEXISTENTE;
         }
         if(!transacao.getSenha().equals(cartao.getSenha())){
@@ -30,12 +31,13 @@ public class AutorizadorService {
             return AutorizacaoRetorno.SALDO_INSUFICIENTE;
         }
         cartao.performDebit(transacao.getValor());
+        cartaoRepository.save(cartao);
         return AutorizacaoRetorno.OK;
     }
 
     private static boolean hasCredito(TransacaoRequest transacao, Cartao cartao) {
         BigDecimal saldo = cartao.getSaldo().subtract(transacao.getValor());
-        return saldo.compareTo(cartao.getSaldo()) == -1;
+        return saldo.compareTo(BigDecimal.valueOf(0L)) == -1;
     }
     @Transactional
     public void deleteCard(Long numCartao){

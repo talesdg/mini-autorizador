@@ -41,20 +41,20 @@ public class AutorizadorServiceTest {
         transactions.add(new TransacaoRequest(6549873025634501L,"1234",new BigDecimal("300.00")));
         AutorizacaoRetorno retorno = AutorizacaoRetorno.OK;
         for (TransacaoRequest transacao : transactions) {
-            retorno = autorizadorService.performTransaction(transacao, this.cartao);
+            retorno = autorizadorService.performTransaction(transacao);
         }
         Assert.assertEquals(AutorizacaoRetorno.SALDO_INSUFICIENTE,retorno);
     }
     @Test()
     public void performTransactionWithInvalidPassword(){
         TransacaoRequest transacao = new TransacaoRequest(6549873025634501L, "12345", new BigDecimal("200.00"));
-        AutorizacaoRetorno retorno = autorizadorService.performTransaction(transacao, this.cartao);
+        AutorizacaoRetorno retorno = autorizadorService.performTransaction(transacao);
         Assert.assertEquals(AutorizacaoRetorno.SENHA_INVALIDA,retorno);
     }
     @Test()
     public void performTransactionWithCardNonexistent(){
         TransacaoRequest transacao = new TransacaoRequest(12323434L, "1234", new BigDecimal("200.00"));
-        AutorizacaoRetorno retorno = autorizadorService.performTransaction(transacao, this.cartao);
+        AutorizacaoRetorno retorno = autorizadorService.performTransaction(transacao);
         Assert.assertEquals(AutorizacaoRetorno.CARTAO_INEXISTENTE,retorno);
     }
 }
