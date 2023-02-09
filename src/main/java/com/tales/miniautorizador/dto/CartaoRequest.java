@@ -3,18 +3,13 @@ package com.tales.miniautorizador.dto;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.math.BigDecimal;
-
 @Getter
 @NoArgsConstructor
-public class TransacaoRequest {
+public class CartaoRequest {
     private Long numeroCartao;
     private String senha;
-    private BigDecimal valor;
-
-    public TransacaoRequest(Long numeroCartao, String senha, BigDecimal valor) {
+    public CartaoRequest(Long numeroCartao, String senha) {
         this.numeroCartao = numeroCartao;
         this.senha = senha;
-        this.valor = valor;
     }
 }

@@ -22,14 +22,14 @@ public class AutorizadorService {
     @Autowired
     private CartaoRepository cartaoRepository;
     public ResponseEntity<Object> createNewCard(Long numCartao, String senha){
-        Cartao cartao = cartaoRepository.findByNumCartao(numCartao);
+        Cartao cartao = cartaoRepository.findByNumeroCartao(numCartao);
         validaCartaoExistente(cartao);
         cartao = cartaoRepository.save(new Cartao(numCartao, senha));
         return new ResponseEntity<>(cartao, HttpStatus.CREATED);
     }
 
     public ResponseEntity<Object> performTransaction(TransacaoRequest transacao) throws UnprocessableException{
-        Cartao cartao = cartaoRepository.findByNumCartao(transacao.getNumCartao());
+        Cartao cartao = cartaoRepository.findByNumeroCartao(transacao.getNumeroCartao());
         validaCartaoInexistente(cartao);
         validaSenhaInvalida(transacao, cartao);
         validaSaldo(transacao, cartao);
@@ -68,11 +68,11 @@ public class AutorizadorService {
     }
     @Transactional
     public void deleteCard(Long numCartao){
-        cartaoRepository.deleteByNumCartao(numCartao);
+        cartaoRepository.deleteByNumeroCartao(numCartao);
     }
 
     public ResponseEntity<Object> getCardBalance(Long numCartao) {
-        Cartao cartao = cartaoRepository.findByNumCartao(numCartao);
+        Cartao cartao = cartaoRepository.findByNumeroCartao(numCartao);
         verificaCartaoInexistente(cartao);
         return new ResponseEntity<>(cartao.getSaldo(), HttpStatus.OK);
     }

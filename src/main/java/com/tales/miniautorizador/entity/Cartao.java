@@ -16,16 +16,16 @@ public class Cartao {
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "id", nullable = false)
     private Long id;
-    @Column(name = "numCartao", nullable = false)
-    private Long numCartao;
+    @Column(name = "numeroCartao", nullable = false)
+    private Long numeroCartao;
     @Column(name = "senha", nullable = false)
     private String senha;
     @JsonIgnore
     @Column(name = "saldo", nullable = false)
     private BigDecimal saldo;
 
-    public Cartao(Long numCartao, String senha){
-        this.numCartao = numCartao;
+    public Cartao(Long numeroCartao, String senha){
+        this.numeroCartao = numeroCartao;
         this.senha = senha;
         this.saldo = new BigDecimal("500.00");
     }

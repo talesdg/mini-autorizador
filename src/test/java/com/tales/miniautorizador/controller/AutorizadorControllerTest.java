@@ -2,6 +2,7 @@ package com.tales.miniautorizador.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tales.miniautorizador.controller.scenario.AutorizadorScenario;
+import com.tales.miniautorizador.dto.CartaoRequest;
 import com.tales.miniautorizador.dto.TransacaoRequest;
 import com.tales.miniautorizador.enums.AutorizacaoRetorno;
 import com.tales.miniautorizador.service.AutorizadorService;
@@ -86,14 +87,14 @@ public class AutorizadorControllerTest {
     public void whenCreateNewCard(AutorizadorScenario scenario) throws Exception {
         ObjectMapper objectMapper = new ObjectMapper();
         String jsonString = objectMapper.writeValueAsString(
-                new TransacaoRequest(scenario.getNumCartao(), scenario.getSenha(),scenario.getValor())
+                new CartaoRequest(scenario.getNumCartao(), scenario.getSenha())
         );
         if(scenario.getExpectedResponse().equals(true)){
             mockMvc.perform(post(URL_CREATE_NEW_CARD).content(jsonString).contentType(MediaType.APPLICATION_JSON));
         }
         mockMvc.perform(post(URL_CREATE_NEW_CARD).content(jsonString).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(scenario.getStatus())
-                .andExpect(jsonPath("numCartao").value(scenario.getNumCartao()))
+                .andExpect(jsonPath("numeroCartao").value(scenario.getNumCartao()))
                 .andExpect(jsonPath("senha").value(scenario.getSenha()))
         ;
     }
